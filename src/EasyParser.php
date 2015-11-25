@@ -80,21 +80,12 @@ class EasyParser
     	$index = -1;
 
     	if (!empty($parts[2])) {
-    		$attributes = ltrim($parts[2], '[');
-    		$attributes = rtrim($attributes, ']');
-    		$attributes = explode('][', $attributes);
+            if (preg_match("/\[([0-9]+)\]/", $parts[2], $matched_index)) {
+                $index = $matched_index[1];
+                $parts[2] = str_replace($matched_index[0], '', $parts[2]);
+            }
 
-    		$attributes_str = '';
-
-	    	foreach ($attributes as $attr) {
-	    		if (is_numeric($attr)) {
-	    			$index = $attr;
-	    		} else {
-	    			$attributes_str .= '[' . $attr . ']';
-	    		}
-	    	}
-
-	    	$query .= $attributes_str;
+	    	$query .= $parts[2];
     	}
 
     	return [
