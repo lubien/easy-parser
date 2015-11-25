@@ -40,24 +40,42 @@ class EasyParser
 
     	$target = $this->dom;
     	$acumulator = [];
+        $single_target = false;
 
     	foreach ($actions as $i => $action) {
-    		$foo = $this->search($action);
-    		$acumulator[] = $foo['query'];
+    		$act = $this->actionInterpreter($action);
 
-    		if ($foo['index'] !== -1) {
-    			$target = $target->find(implode(' ', $acumulator), $foo['index']);
+    		$acumulator[] = $act['query'];
+
+    		if ($act['index'] !== -1) {
+    			$target = $target->find(implode(' ', $acumulator), $act['index']);
     			$acumulator = [];
+
+                if ($i === (count($actions)-1))
+                    $single_target = true;
     		}
     	}
 
-    	return [
-    		'innertext' => $target->innertext,
-    		'plaintext' => $target->plaintext,
-    	];
+        if ($single_target === true) {
+            return [
+                'innertext' => $target->innertext,
+                'plaintext' => $target->plaintext,
+                'attr' => $target->attr
+            ];
+        } else {
+            $resp = [];
+            foreach ($target as $tag) {
+                $resp[] = [
+                    'innertext' => $tag->innertext,
+                    'plaintext' => $tag->plaintext,
+                    'attr' => $tag->attr
+                ];
+            }
+            return $resp;
+        }
     }
 
-    private function search($action)
+    private function actionInterpreter($action)
     {
     	preg_match("/([.#a-z-A-Z0-9]+)?(\[(.*)\])?/", $action, $parts);
 
