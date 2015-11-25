@@ -72,29 +72,51 @@ class EasyParser
         }
     }
 
+    /**
+     * Take a selector string and parses into a SimpleHTMLDOM understandable string
+     * @param  string $action Receive a string containing desired parsing target
+     * @return array          A query for SimpleHTMLDOM and a tag index. -1 for all tags
+     */
     private function actionInterpreter($action)
     {
+        // Separate in two parts the input query
+        // $parts[1] : tag name like 'body', 'a', 'h1'
+        // $parts[2] : a string containing all attribute's selectors like
+        //             '[id=foo]', '[class=panel]', '[hasAttr]'
     	preg_match("/([.#a-z-A-Z0-9]+)?(\[(.*)\])?/", $action, $parts);
 
-    	$query = strtolower($parts[1]);
-    	$index = -1;
+    	$query = $parts[1];
+
+        // Below, we will match a numeric attribute that represents a searching index
+        // If you search for 'p[0]' you will get the first paragraph. 'p[1]' for second
+        // If $index keeps at -1, we will search for all results
+        $index = -1;
 
     	if (!empty($parts[2])) {
+            // Try to match a index
             if (preg_match("/\[([0-9]+)\]/", $parts[2], $matched_index)) {
+                // Update index
                 $index = $matched_index[1];
+                // Remove this index from attributes because SimpleHTMLDOM doesn't understand it
                 $parts[2] = str_replace($matched_index[0], '', $parts[2]);
             }
 
 	    	$query .= $parts[2];
     	}
 
+        // Return an array to be understood by $this->find()
     	return [
     		'query' => $query,
     		'index' => $index
     	];
     }
 
-    public function returnTag($node)
+    /**
+     * Return an array of values of data from a HTML tag
+     * @param  Object $node A node came from a SimpleHTMLDOM search
+     * @return array        Data scrapped from this tag
+     */
+    private function returnTag($node)
     {
         return [
             'innertext' => $node->innertext,

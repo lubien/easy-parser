@@ -38,7 +38,7 @@ class EasyParserTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('Example Domain', $h1['plaintext']);
 
 		// Find an <a>
-		$a = $parser->find("body A");
+		$a = $parser->find("bodya");
 		$this->assertEquals(1, count($a));
 		$this->assertEquals('More information...', $a[0]['plaintext']);
 		$this->assertEquals('http://www.iana.org/domains/example', $a[0]['attr']['href']);
