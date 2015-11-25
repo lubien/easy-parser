@@ -36,7 +36,10 @@ class EasyParser
 
     public function find($selector='')
     {
-    	$actions = explode(' ', $selector);
+    	if ($this->dom === false)
+            return false;
+
+        $actions = explode(' ', $selector);
 
     	$target = $this->dom;
     	$acumulator = [];
@@ -56,22 +59,16 @@ class EasyParser
     		}
     	}
 
-        if ($single_target === true) {
-            return [
-                'innertext' => $target->innertext,
-                'plaintext' => $target->plaintext,
-                'attr' => $target->attr
-            ];
-        } else {
+        if ($single_target === false) {
             $resp = [];
-            foreach ($target as $tag) {
-                $resp[] = [
-                    'innertext' => $tag->innertext,
-                    'plaintext' => $tag->plaintext,
-                    'attr' => $tag->attr
-                ];
+
+            foreach ($target->find(implode(' ', $acumulator)) as $tag) {
+                $resp[] = $this->returnTag($tag);
             }
+
             return $resp;
+        } else {
+            return $this->returnTag($target);
         }
     }
 
@@ -92,7 +89,6 @@ class EasyParser
 	    	foreach ($attributes as $attr) {
 	    		if (is_numeric($attr)) {
 	    			$index = $attr;
-	    			continue;
 	    		} else {
 	    			$attributes_str .= '[' . $attr . ']';
 	    		}
@@ -105,5 +101,14 @@ class EasyParser
     		'query' => $query,
     		'index' => $index
     	];
+    }
+
+    public function returnTag($node)
+    {
+        return [
+            'innertext' => $node->innertext,
+            'plaintext' => $node->plaintext,
+            'attr' => $node->attr
+        ];
     }
 }
