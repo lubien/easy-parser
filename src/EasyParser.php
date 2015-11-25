@@ -34,31 +34,54 @@ class EasyParser
     	return $this->loadByText($html);
     }
 
+    /**
+     * Find HTML tags by an input text like 'html a[0]'
+     * @param  string $selector Pattern to search in the DOM
+     * @return array            An array of a single DOM tag or multiple tags
+     */
     public function find($selector='')
     {
+        // Requires the DOM to be populated
     	if ($this->dom === false)
             return false;
 
+        // Separate selectors by spaces
         $actions = explode(' ', $selector);
 
+        // $target : starting as the DOM itself, we will strict it until we find our final tag(s)
+        // $acumulator : instead of searching for each tag, if you don't specify a index, we
+        //               will store actions. This means that 'body header[0] p a span[0]' will
+        //               separate execution into 'body header[0]' and 'p a span[0]', two searchs
+        //               instead of all 5. It'll sure faster our script
+        // $single_target : this will tell us if at the end we need one or more tags results
     	$target = $this->dom;
     	$acumulator = [];
         $single_target = false;
 
     	foreach ($actions as $i => $action) {
+            // Interpret our text input into SimpleHTMLDOM undestandable values
     		$act = $this->actionInterpreter($action);
 
+            // Add this query to our acumulator
     		$acumulator[] = $act['query'];
 
-    		if ($act['index'] !== -1) {
+            // Only searches when we specify an index higher than -1
+    		if ($act['index'] > -1) {
+                // SimpleHTMLDOM to search in the DOM. As longs as we keep storing
+                // results in $target, our result will get closer to our desired tag(s)
     			$target = $target->find(implode(' ', $acumulator), $act['index']);
+                // Reset our acumulator
     			$acumulator = [];
 
+                // If this was our last action and we know that we just searched in
+                // the DOM, we make $single_target true. That means 'this was our last search'
                 if ($i === (count($actions)-1))
                     $single_target = true;
     		}
     	}
 
+        // If we don't made a 'last search' like explained above, that means we have to parse
+        // all tags instead of one
         if ($single_target === false) {
             $resp = [];
 
