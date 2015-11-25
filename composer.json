@@ -1,0 +1,24 @@
+{
+    "name": "lubien/easy-parser",
+    "description": "Easily parse html",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lubien",
+            "email": "lubien1996@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "sunra/php-simple-html-dom-parser": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "5.0.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lubien\\EasyParser\\": "src/"
+        }
+    }
+}
